@@ -19,9 +19,8 @@ RUN groupadd -r dev && useradd -r -g dev -m -s /bin/bash dev \
 USER dev
 SHELL ["/bin/bash", "-c"]
 
-RUN curl -s "https://get.sdkman.io" | bash \
+RUN bash -c "curl -s 'https://get.sdkman.io' | bash" || true \
     && mkdir -p "$HOME/.sdkman/src" "$HOME/.sdkman/tmp" "$HOME/.sdkman/archives" \
-    && sed -i 's/sdkman_auto_selfupdate=true/sdkman_auto_selfupdate=false/' "$HOME/.sdkman/etc/config" || true \
     && source "$HOME/.sdkman/bin/sdkman-init.sh" \
     && sdk install java ${SDKMAN_JDK} \
     && sdk install gradle ${SDKMAN_GRADLE} \
