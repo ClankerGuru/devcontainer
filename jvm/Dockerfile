@@ -21,11 +21,10 @@ SHELL ["/bin/bash", "-c"]
 
 ENV SDKMAN_DIR=/home/dev/.sdkman
 
-RUN mkdir -p "$SDKMAN_DIR/src" "$SDKMAN_DIR/tmp" "$SDKMAN_DIR/archives" "$SDKMAN_DIR/ext"
-
 RUN export sdkman_auto_answer=true \
     && export sdkman_selfupdate_feature=false \
-    && curl -s "https://get.sdkman.io?rcupdate=false" | bash \
+    && (curl -s "https://get.sdkman.io?rcupdate=false" | bash || true) \
+    && mkdir -p "$SDKMAN_DIR/src" \
     && source "$SDKMAN_DIR/bin/sdkman-init.sh" \
     && sdk install java ${SDKMAN_JDK} \
     && sdk install gradle ${SDKMAN_GRADLE} \
