@@ -20,6 +20,7 @@ USER dev
 SHELL ["/bin/bash", "-c"]
 
 RUN curl -s "https://get.sdkman.io" | bash \
+    && mkdir -p "$HOME/.sdkman/src" \
     && source "$HOME/.sdkman/bin/sdkman-init.sh" \
     && sdk install java ${SDKMAN_JDK} \
     && sdk install gradle ${SDKMAN_GRADLE} \
