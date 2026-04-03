@@ -23,7 +23,7 @@ RUN curl -s "https://get.sdkman.io" | bash \
     && source "$HOME/.sdkman/bin/sdkman-init.sh" \
     && sdk install java ${SDKMAN_JDK} \
     && sdk install gradle ${SDKMAN_GRADLE} \
-    && sdk flush \
+    && rm -rf "$HOME/.sdkman/archives/"* "$HOME/.sdkman/tmp/"* \
     && echo 'source "$HOME/.sdkman/bin/sdkman-init.sh"' >> ~/.bashrc \
     && echo 'eval "$(starship init bash)"' >> ~/.bashrc \
     && mkdir -p ~/.gradle/wrapper ~/.gradle/caches
