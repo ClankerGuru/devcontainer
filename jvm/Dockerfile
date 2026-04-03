@@ -19,18 +19,20 @@ RUN groupadd -r dev && useradd -r -g dev -m -s /bin/bash dev \
 USER dev
 SHELL ["/bin/bash", "-c"]
 
-RUN bash -c "curl -s 'https://get.sdkman.io' | bash" || true \
-    && mkdir -p "$HOME/.sdkman/src" "$HOME/.sdkman/tmp" "$HOME/.sdkman/archives" \
-    && source "$HOME/.sdkman/bin/sdkman-init.sh" \
+ENV SDKMAN_DIR=/home/dev/.sdkman
+
+RUN export sdkman_auto_answer=true \
+    && export sdkman_selfupdate_feature=false \
+    && curl -s "https://get.sdkman.io?rcupdate=false" | bash \
+    && source "$SDKMAN_DIR/bin/sdkman-init.sh" \
     && sdk install java ${SDKMAN_JDK} \
     && sdk install gradle ${SDKMAN_GRADLE} \
-    && rm -rf "$HOME/.sdkman/archives/"* "$HOME/.sdkman/tmp/"* \
+    && rm -rf "$SDKMAN_DIR/archives/"* "$SDKMAN_DIR/tmp/"* \
     && echo 'source "$HOME/.sdkman/bin/sdkman-init.sh"' >> ~/.bashrc \
     && echo 'eval "$(starship init bash)"' >> ~/.bashrc \
     && mkdir -p ~/.gradle/wrapper ~/.gradle/caches
 
-ENV SDKMAN_DIR=/home/dev/.sdkman \
-    JAVA_HOME=/home/dev/.sdkman/candidates/java/current \
+ENV JAVA_HOME=/home/dev/.sdkman/candidates/java/current \
     GRADLE_HOME=/home/dev/.sdkman/candidates/gradle/current \
     GRADLE_USER_HOME=/home/dev/.gradle \
     PATH="/home/dev/.sdkman/candidates/java/current/bin:/home/dev/.sdkman/candidates/gradle/current/bin:${PATH}"
