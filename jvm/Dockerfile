@@ -24,7 +24,7 @@ ENV SDKMAN_DIR=/home/dev/.sdkman
 RUN export sdkman_auto_answer=true \
     && export sdkman_selfupdate_feature=false \
     && curl -s "https://get.sdkman.io?rcupdate=false" -o /tmp/sdkman-install.sh \
-    && sed -i '/sdkman_src_folder/d' /tmp/sdkman-install.sh \
+    && sed -i '/find.*folder.*-type f -delete/d' /tmp/sdkman-install.sh \
     && bash /tmp/sdkman-install.sh \
     && rm /tmp/sdkman-install.sh \
     && source "$SDKMAN_DIR/bin/sdkman-init.sh" \
