@@ -82,6 +82,17 @@ resource "coder_agent" "main" {
   EOT
 }
 
+module "jetbrains_gateway" {
+  count          = data.coder_workspace.me.start_count
+  source         = "registry.coder.com/modules/jetbrains-gateway/coder"
+  version        = "1.1.0"
+  agent_id       = coder_agent.main.id
+  folder         = "/workspace"
+  jetbrains_ides = ["IU"]
+  default        = "IU"
+  latest         = true
+}
+
 resource "docker_image" "workspace" {
   name = data.coder_parameter.image.value
 }
