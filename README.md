@@ -1,61 +1,137 @@
 # devcontainer
 
-Base images for ClankerGuru development containers.
+[![Build](https://github.com/ClankerGuru/devcontainer/actions/workflows/build.yml/badge.svg)](https://github.com/ClankerGuru/devcontainer/actions/workflows/build.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+Base development container images for ClankerGuru projects.
 
 ## Images
 
-| Tag | What's inside |
-|-----|--------------|
-| `ghcr.io/clankerguru/devcontainer:gradle-9.4.1-jbr17` | Ubuntu 24.04, JetBrains Runtime 17, Gradle 9.4.1, git, gh, Starship |
-| `ghcr.io/clankerguru/devcontainer:gradle-latest` | Same, always points to the latest JVM image |
+### Base (no agents)
+
+| Tag | Description |
+|-----|-------------|
+| `ghcr.io/clankerguru/devcontainer:gradle-9.4.1-jbr17` | Pinned versions |
+| `ghcr.io/clankerguru/devcontainer:gradle-latest` | Always latest base |
+
+### With AI agents
+
+| Tag | Agents included |
+|-----|----------------|
+| `ghcr.io/clankerguru/devcontainer:gradle-claude` | Claude Code |
+| `ghcr.io/clankerguru/devcontainer:gradle-copilot` | GitHub Copilot CLI |
+| `ghcr.io/clankerguru/devcontainer:gradle-codex` | OpenAI Codex CLI |
+| `ghcr.io/clankerguru/devcontainer:gradle-opencode` | OpenCode |
+| `ghcr.io/clankerguru/devcontainer:gradle-all` | All four agents |
 
 ## Use in a project
 
-In your project's `.devcontainer/Dockerfile`:
+Create `.devcontainer/Dockerfile`:
 
 ```dockerfile
-FROM ghcr.io/clankerguru/devcontainer:gradle-latest
+FROM ghcr.io/clankerguru/devcontainer:gradle-all
 ```
 
-That's it. No installs, no SDKMAN, no downloads. Everything is in the image.
+Create `.devcontainer/devcontainer.json`:
 
-## What's included (JVM)
+```json
+{
+  "name": "my-project",
+  "build": { "dockerfile": "Dockerfile" },
+  "runArgs": ["--name", "my-project-dev", "--hostname", "my-project"],
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "remoteUser": "dev",
+  "mounts": [
+    "source=my-project-gradle-cache,target=/home/dev/.gradle,type=volume"
+  ],
+  "containerEnv": {
+    "GRADLE_OPTS": "-Xmx2g -XX:+UseG1GC"
+  }
+}
+```
 
-Installed via SDKMAN:
-- **JetBrains Runtime 17** (`17.0.14-jbr`)
-- **Gradle 9.4.1**
+Open in JetBrains Gateway, IntelliJ IDEA, VS Code, or GitHub Codespaces.
 
-System tools:
-- git, gh (GitHub CLI), curl, unzip, openssh-client
-- Starship prompt
-- sudo (passwordless for `dev` user)
+## What's inside
 
-Not included (handled by devcontainer features):
-- Docker-in-Docker (add `ghcr.io/devcontainers/features/docker-in-docker:2` in devcontainer.json)
+### Base image (`gradle-latest`)
+
+| Tool | Version | Installed via |
+|------|---------|---------------|
+| Ubuntu | 24.04 | base image |
+| JetBrains Runtime | 17.0.14 | SDKMAN |
+| Gradle | 9.4.1 | SDKMAN |
+| Go | 1.24.2 | direct download |
+| Bun | latest | curl installer |
+| git | system | apt |
+| gh (GitHub CLI) | latest | apt |
+| Starship | latest | curl installer |
+| gum | latest | go install |
+| glow | latest | go install |
+| vhs | latest | go install |
+| skate | latest | go install |
+
+User: `dev` with passwordless sudo.
+
+### Agent images
+
+Built on top of the base. Each agent is installed via Bun or Go:
+
+| Agent | Package | Runtime |
+|-------|---------|---------|
+| Claude Code | `@anthropic-ai/claude-code` | Bun |
+| Copilot CLI | `@github/copilot` | Bun |
+| Codex CLI | `@openai/codex` | Bun |
+| OpenCode | `github.com/opencode-ai/opencode` | Go |
+
+### Not in the image
+
+Docker-in-Docker is added at container startup via the devcontainer feature `ghcr.io/devcontainers/features/docker-in-docker:2`. This is handled by `devcontainer.json`, not the Dockerfile.
 
 ## Build locally
 
 ```bash
-docker build -t devcontainer:jvm-local jvm/
+# Base image
+docker build -t devcontainer:gradle-local jvm/
+
+# Agent variant (claude, copilot, codex, opencode, or all)
+docker build -t devcontainer:gradle-claude --build-arg AGENTS=claude jvm-agents/
+docker build -t devcontainer:gradle-all --build-arg AGENTS=all jvm-agents/
 ```
 
-## Variants
-
-Each subdirectory is a variant:
+## Repository structure
 
 ```
 devcontainer/
-├── jvm/           ← JetBrains Runtime + Gradle
-├── swift/         ← (future)
-└── node/          ← (future)
+├── jvm/                    ← Base image Dockerfile
+│   └── Dockerfile
+├── jvm-agents/             ← Agent variant Dockerfile (builds FROM base)
+│   └── Dockerfile
+├── .github/workflows/
+│   └── build.yml           ← Builds base + 5 agent variants on push
+└── README.md
 ```
 
-Tags follow the pattern: `<variant>-<details>` and `<variant>-latest`.
+## Connect
+
+| Client | How |
+|--------|-----|
+| **JetBrains Gateway** | Dev Containers → select project folder |
+| **IntelliJ IDEA** | Open folder → "Reopen in Dev Container" |
+| **VS Code** | Open folder → "Reopen in Container" |
+| **GitHub Codespaces** | Code → Codespaces → New |
+| **Coder** | Create workspace from template → connect via Gateway/VS Code/browser |
 
 ## Offline / private registry
 
 ```bash
-docker pull ghcr.io/clankerguru/devcontainer:gradle-latest
-docker tag ghcr.io/clankerguru/devcontainer:gradle-latest localhost:5000/devcontainer:gradle-latest
-docker push localhost:5000/devcontainer:gradle-latest
+docker pull ghcr.io/clankerguru/devcontainer:gradle-all
+docker tag ghcr.io/clankerguru/devcontainer:gradle-all localhost:5000/devcontainer:gradle-all
+docker push localhost:5000/devcontainer:gradle-all
 ```
+
+## License
+
+[MIT](LICENSE)
