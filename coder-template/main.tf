@@ -14,6 +14,7 @@ terraform {
 provider "docker" {}
 provider "coder" {}
 
+data "coder_provisioner" "me" {}
 data "coder_workspace" "me" {}
 data "coder_workspace_owner" "me" {}
 
@@ -67,7 +68,7 @@ data "coder_parameter" "image" {
 
 resource "coder_agent" "main" {
   os             = "linux"
-  arch           = "amd64"
+  arch           = data.coder_provisioner.me.arch
   dir            = "/workspace"
   startup_script = <<-EOT
     # Clone the repo if not already present
@@ -116,14 +117,13 @@ resource "docker_container" "workspace" {
   count   = data.coder_workspace.me.start_count
   name    = "coder-${data.coder_workspace_owner.me.name}-${data.coder_workspace.me.name}"
   image   = docker_image.workspace.image_id
-  command = ["sh", "-c", replace(coder_agent.main.init_script, "/localhost|127\\.0\\.0\\.1/", "host.docker.internal")]
+  entrypoint = ["sh", "-c", replace(coder_agent.main.init_script, "/localhost|127\\.0\\.0\\.1/", "host.docker.internal")]
 
   hostname = data.coder_workspace.me.name
   dns      = ["1.1.1.1"]
 
   env = [
     "CODER_AGENT_TOKEN=${coder_agent.main.token}",
-    "CODER_AGENT_URL=https://coder.clanker.zone",
     "GRADLE_OPTS=-Xmx2g -XX:+UseG1GC",
   ]
 
