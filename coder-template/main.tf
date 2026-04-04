@@ -1,10 +1,12 @@
 terraform {
   required_providers {
     coder = {
-      source = "coder/coder"
+      source  = "coder/coder"
+      version = "~> 2.0"
     }
     docker = {
-      source = "kreuzwerker/docker"
+      source  = "kreuzwerker/docker"
+      version = "~> 3.0"
     }
   }
 }
@@ -74,7 +76,9 @@ resource "coder_agent" "main" {
     fi
 
     # Source SDKMAN for the agent session
-    source "$HOME/.sdkman/bin/sdkman-init.sh"
+    if [ -f "$HOME/.sdkman/bin/sdkman-init.sh" ]; then
+      . "$HOME/.sdkman/bin/sdkman-init.sh"
+    fi
   EOT
 }
 
@@ -91,9 +95,10 @@ resource "docker_volume" "workspace_data" {
 }
 
 resource "docker_container" "workspace" {
-  count = data.coder_workspace.me.start_count
-  name  = "coder-${data.coder_workspace_owner.me.name}-${data.coder_workspace.me.name}"
-  image = docker_image.workspace.image_id
+  count   = data.coder_workspace.me.start_count
+  name    = "coder-${data.coder_workspace_owner.me.name}-${data.coder_workspace.me.name}"
+  image   = docker_image.workspace.image_id
+  command = ["sh", "-c", coder_agent.main.init_script]
 
   hostname = data.coder_workspace.me.name
   dns      = ["1.1.1.1"]

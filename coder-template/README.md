@@ -19,7 +19,7 @@ When you create a workspace from this template, it:
 |-----------|---------|---------|
 | **repo** | `git@github.com:ClankerGuru/wrkx.git` | Any git URL |
 | **branch** | `main` | Any branch/tag |
-| **image** | `gradle-all` | `gradle-latest`, `gradle-claude`, `gradle-copilot`, `gradle-codex`, `gradle-opencode`, `gradle-all` |
+| **image** | `ghcr.io/clankerguru/devcontainer:gradle-all` | Select from dropdown: Base, Claude, Copilot, Codex, OpenCode, All |
 
 ## Volumes
 
