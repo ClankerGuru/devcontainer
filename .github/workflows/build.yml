@@ -34,7 +34,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ${{ env.IMAGE }}:gradle-jbr17
+            ${{ env.IMAGE }}:gradle-9.4.1-jbr17
             ${{ env.IMAGE }}:gradle-latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
