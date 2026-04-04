@@ -11,7 +11,7 @@ Base development container images for ClankerGuru projects.
 
 | Tag | Description |
 |-----|-------------|
-| `ghcr.io/clankerguru/devcontainer:gradle-9.4.1-jbr17` | Pinned Gradle + JDK versions |
+| `ghcr.io/clankerguru/devcontainer:gradle-9.4.1-kotlin-2.3.20-jbr17` | Pinned versions |
 | `ghcr.io/clankerguru/devcontainer:gradle-latest` | Always latest base |
 
 ### With AI agents
@@ -62,7 +62,7 @@ Open in JetBrains Gateway, IntelliJ IDEA, VS Code, or GitHub Codespaces.
 |------|---------|---------------|
 | Ubuntu | 24.04 | base image |
 | JetBrains Runtime | 17.0.14 | SDKMAN |
-| Kotlin | latest | SDKMAN |
+| Kotlin | 2.3.20 | SDKMAN |
 | Gradle | 9.4.1 | SDKMAN |
 | Go | 1.24.2 | direct download |
 | Bun | latest | curl installer |

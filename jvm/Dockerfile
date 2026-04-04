@@ -2,6 +2,7 @@ FROM ubuntu:24.04
 
 ARG SDKMAN_JDK=17.0.14-jbr
 ARG SDKMAN_GRADLE=9.4.1
+ARG SDKMAN_KOTLIN=2.3.20
 ARG GO_VERSION=1.24.2
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -37,7 +38,7 @@ RUN export sdkman_auto_answer=true \
     && source "$SDKMAN_DIR/bin/sdkman-init.sh" \
     && sdk install java ${SDKMAN_JDK} \
     && sdk install gradle ${SDKMAN_GRADLE} \
-    && sdk install kotlin \
+    && sdk install kotlin ${SDKMAN_KOTLIN} \
     && rm -rf "$SDKMAN_DIR/archives/"* "$SDKMAN_DIR/tmp/"* \
     && curl -fsSL https://bun.sh/install | bash \
     && ln -sf /home/dev/.bun/bin/bun /home/dev/.bun/bin/node \
