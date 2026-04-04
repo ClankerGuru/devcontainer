@@ -116,6 +116,7 @@ resource "docker_container" "workspace" {
 
   env = [
     "CODER_AGENT_TOKEN=${coder_agent.main.token}",
+    "CODER_AGENT_URL=${data.coder_workspace.me.access_url}",
     "GRADLE_OPTS=-Xmx2g -XX:+UseG1GC",
   ]
 
