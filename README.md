@@ -77,14 +77,14 @@ User: `dev` with passwordless sudo.
 
 ### Agent images
 
-Built on top of the base. Each agent is installed via Bun or Go:
+Built on top of the base. All agents installed via Bun:
 
 | Agent | Package | Runtime |
 |-------|---------|---------|
 | Claude Code | `@anthropic-ai/claude-code` | Bun |
 | Copilot CLI | `@github/copilot` | Bun |
 | Codex CLI | `@openai/codex` | Bun |
-| OpenCode | `github.com/opencode-ai/opencode` | Go |
+| OpenCode | `opencode-ai` | Bun |
 
 ### Not in the image
 
@@ -109,6 +109,9 @@ devcontainer/
 │   └── Dockerfile
 ├── jvm-agents/             ← Agent variant Dockerfile (builds FROM base)
 │   └── Dockerfile
+├── coder-template/         ← Coder workspace template (Terraform)
+│   ├── main.tf
+│   └── README.md
 ├── .github/workflows/
 │   └── build.yml           ← Builds base + 5 agent variants on push
 └── README.md
