@@ -11,7 +11,7 @@ Base development container images for ClankerGuru projects.
 
 | Tag | Description |
 |-----|-------------|
-| `ghcr.io/clankerguru/devcontainer:gradle-9.4.1-jbr17` | Pinned versions |
+| `ghcr.io/clankerguru/devcontainer:<git-tag>` | Pinned versions (e.g. `gradle-9.4.1-kotlin-2.3.20-jbr17`) |
 | `ghcr.io/clankerguru/devcontainer:gradle-latest` | Always latest base |
 
 ### With AI agents
@@ -62,6 +62,7 @@ Open in JetBrains Gateway, IntelliJ IDEA, VS Code, or GitHub Codespaces.
 |------|---------|---------------|
 | Ubuntu | 24.04 | base image |
 | JetBrains Runtime | 17.0.14 | SDKMAN |
+| Kotlin | 2.3.20 | SDKMAN |
 | Gradle | 9.4.1 | SDKMAN |
 | Go | 1.24.2 | direct download |
 | Bun | latest | curl installer |
@@ -77,14 +78,14 @@ User: `dev` with passwordless sudo.
 
 ### Agent images
 
-Built on top of the base. Each agent is installed via Bun or Go:
+Built on top of the base. All agents installed via Bun:
 
 | Agent | Package | Runtime |
 |-------|---------|---------|
 | Claude Code | `@anthropic-ai/claude-code` | Bun |
 | Copilot CLI | `@github/copilot` | Bun |
 | Codex CLI | `@openai/codex` | Bun |
-| OpenCode | `github.com/opencode-ai/opencode` | Go |
+| OpenCode | `opencode-ai` | Bun |
 
 ### Not in the image
 
@@ -109,8 +110,11 @@ devcontainer/
 │   └── Dockerfile
 ├── jvm-agents/             ← Agent variant Dockerfile (builds FROM base)
 │   └── Dockerfile
+├── coder-template/         ← Coder workspace template (Terraform)
+│   ├── main.tf
+│   └── README.md
 ├── .github/workflows/
-│   └── build.yml           ← Builds base + 5 agent variants on push
+│   └── build.yml           ← Builds base + 5 agent variants on tag push
 └── README.md
 ```
 
@@ -123,6 +127,17 @@ devcontainer/
 | **VS Code** | Open folder → "Reopen in Container" |
 | **GitHub Codespaces** | Code → Codespaces → New |
 | **Coder** | Create workspace from template → connect via Gateway/VS Code/browser |
+
+## Release a new image
+
+Update the versions in `jvm/Dockerfile`, commit, tag, and push:
+
+```bash
+git tag gradle-9.4.1-kotlin-2.3.20-jbr17
+git push --tags
+```
+
+CI builds the base image tagged with the git tag + `gradle-latest`, then builds all 5 agent variants on top. The git tag **is** the Docker image tag — one source of truth.
 
 ## Offline / private registry
 

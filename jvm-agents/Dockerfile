@@ -13,5 +13,5 @@ RUN if [ "$AGENTS" = "all" ] || echo "$AGENTS" | grep -q "claude"; then \
         bun install -g @openai/codex; \
     fi \
     && if [ "$AGENTS" = "all" ] || echo "$AGENTS" | grep -q "opencode"; then \
-        go install github.com/opencode-ai/opencode@latest; \
+        bun install -g opencode-ai; \
     fi
