@@ -11,7 +11,7 @@ Base development container images for ClankerGuru projects.
 
 | Tag | Description |
 |-----|-------------|
-| `ghcr.io/clankerguru/devcontainer:gradle-9.4.1-kotlin-2.3.20-jbr17` | Pinned versions |
+| `ghcr.io/clankerguru/devcontainer:<git-tag>` | Pinned versions (e.g. `gradle-9.4.1-kotlin-2.3.20-jbr17`) |
 | `ghcr.io/clankerguru/devcontainer:gradle-latest` | Always latest base |
 
 ### With AI agents
@@ -114,7 +114,7 @@ devcontainer/
 │   ├── main.tf
 │   └── README.md
 ├── .github/workflows/
-│   └── build.yml           ← Builds base + 5 agent variants on push
+│   └── build.yml           ← Builds base + 5 agent variants on tag push
 └── README.md
 ```
 
@@ -127,6 +127,17 @@ devcontainer/
 | **VS Code** | Open folder → "Reopen in Container" |
 | **GitHub Codespaces** | Code → Codespaces → New |
 | **Coder** | Create workspace from template → connect via Gateway/VS Code/browser |
+
+## Release a new image
+
+Update the versions in `jvm/Dockerfile`, commit, tag, and push:
+
+```bash
+git tag gradle-9.4.1-kotlin-2.3.20-jbr17
+git push --tags
+```
+
+CI builds the base image tagged with the git tag + `gradle-latest`, then builds all 5 agent variants on top. The git tag **is** the Docker image tag — one source of truth.
 
 ## Offline / private registry
 
