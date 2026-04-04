@@ -62,6 +62,7 @@ Open in JetBrains Gateway, IntelliJ IDEA, VS Code, or GitHub Codespaces.
 |------|---------|---------------|
 | Ubuntu | 24.04 | base image |
 | JetBrains Runtime | 17.0.14 | SDKMAN |
+| Kotlin | 2.3.20 | SDKMAN |
 | Gradle | 9.4.1 | SDKMAN |
 | Go | 1.24.2 | direct download |
 | Bun | latest | curl installer |
