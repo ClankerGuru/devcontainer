@@ -93,6 +93,13 @@ module "jetbrains_gateway" {
   latest         = true
 }
 
+module "code_server" {
+  count    = data.coder_workspace.me.start_count
+  source   = "registry.coder.com/coder/code-server/coder"
+  version  = "1.4.4"
+  agent_id = coder_agent.main.id
+}
+
 resource "docker_image" "workspace" {
   name = data.coder_parameter.image.value
 }
@@ -109,14 +116,13 @@ resource "docker_container" "workspace" {
   count   = data.coder_workspace.me.start_count
   name    = "coder-${data.coder_workspace_owner.me.name}-${data.coder_workspace.me.name}"
   image   = docker_image.workspace.image_id
-  command = ["sh", "-c", coder_agent.main.init_script]
+  command = ["sh", "-c", replace(coder_agent.main.init_script, "/localhost|127\\.0\\.0\\.1/", "host.docker.internal")]
 
   hostname = data.coder_workspace.me.name
   dns      = ["1.1.1.1"]
 
   env = [
     "CODER_AGENT_TOKEN=${coder_agent.main.token}",
-    "CODER_AGENT_URL=${data.coder_workspace.me.access_url}",
     "GRADLE_OPTS=-Xmx2g -XX:+UseG1GC",
   ]
 
