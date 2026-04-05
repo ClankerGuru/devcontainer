@@ -116,7 +116,7 @@ docker build -t devcontainer:code-server-local dokploy/
 
 ## Repository structure
 
-```
+```text
 devcontainer/
 ├── jvm/                    <- Dev image Dockerfile
 │   └── Dockerfile

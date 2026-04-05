@@ -10,8 +10,12 @@ services:
       - PASSWORD=${PASSWORD}
       - GRADLE_OPTS=-Xmx2g -XX:+UseG1GC
     volumes:
-      - ../files/code-server-home:/home/dev
-      - ../files/code-server-workspace:/workspace
+      - code-server-data:/home/dev/.local/share/code-server
+      - code-server-workspace:/workspace
+
+volumes:
+  code-server-data:
+  code-server-workspace:
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8443/healthz || exit 1"]
       interval: 30s

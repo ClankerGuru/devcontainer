@@ -13,12 +13,9 @@ RUN code-server --install-extension vscjava.vscode-java-pack \
     && code-server --install-extension vscjava.vscode-gradle \
     && code-server --install-extension naco-siren.gradle-language \
     && code-server --install-extension mathiasfrohlich.Kotlin \
-    # Go
     && code-server --install-extension golang.go \
-    # Rust
     && code-server --install-extension rust-lang.rust-analyzer \
     && code-server --install-extension tamasfe.even-better-toml \
-    # General
     && code-server --install-extension sainnhe.everforest \
     && code-server --install-extension editorconfig.editorconfig \
     && code-server --install-extension eamodio.gitlens \
