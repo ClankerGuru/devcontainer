@@ -34,36 +34,36 @@ data "coder_parameter" "branch" {
   default      = "main"
 }
 
-data "coder_parameter" "image" {
-  name         = "image"
-  display_name = "Image"
-  description  = "Devcontainer image to use"
-  type         = "string"
-  default      = "ghcr.io/clankerguru/devcontainer:gradle-all"
-  option {
-    name  = "Base (no agents)"
-    value = "ghcr.io/clankerguru/devcontainer:gradle-latest"
-  }
-  option {
-    name  = "Claude Code"
-    value = "ghcr.io/clankerguru/devcontainer:gradle-claude"
-  }
-  option {
-    name  = "Copilot CLI"
-    value = "ghcr.io/clankerguru/devcontainer:gradle-copilot"
-  }
-  option {
-    name  = "Codex CLI"
-    value = "ghcr.io/clankerguru/devcontainer:gradle-codex"
-  }
-  option {
-    name  = "OpenCode"
-    value = "ghcr.io/clankerguru/devcontainer:gradle-opencode"
-  }
-  option {
-    name  = "All agents"
-    value = "ghcr.io/clankerguru/devcontainer:gradle-all"
-  }
+data "coder_parameter" "agent_claude" {
+  name         = "agent_claude"
+  display_name = "Claude Code"
+  description  = "Install Claude Code CLI agent"
+  type         = "bool"
+  default      = "true"
+}
+
+data "coder_parameter" "agent_copilot" {
+  name         = "agent_copilot"
+  display_name = "GitHub Copilot CLI"
+  description  = "Install GitHub Copilot CLI agent"
+  type         = "bool"
+  default      = "true"
+}
+
+data "coder_parameter" "agent_codex" {
+  name         = "agent_codex"
+  display_name = "Codex CLI"
+  description  = "Install OpenAI Codex CLI agent"
+  type         = "bool"
+  default      = "true"
+}
+
+data "coder_parameter" "agent_opencode" {
+  name         = "agent_opencode"
+  display_name = "OpenCode"
+  description  = "Install OpenCode CLI agent"
+  type         = "bool"
+  default      = "true"
 }
 
 resource "coder_agent" "main" {
@@ -80,6 +80,20 @@ resource "coder_agent" "main" {
     if [ -f "$HOME/.sdkman/bin/sdkman-init.sh" ]; then
       . "$HOME/.sdkman/bin/sdkman-init.sh"
     fi
+
+    # Install selected AI agents
+    %{if data.coder_parameter.agent_claude.value == "true"}
+    bun install -g @anthropic-ai/claude-code
+    %{endif}
+    %{if data.coder_parameter.agent_copilot.value == "true"}
+    gh extension install github/gh-copilot
+    %{endif}
+    %{if data.coder_parameter.agent_codex.value == "true"}
+    bun install -g @openai/codex
+    %{endif}
+    %{if data.coder_parameter.agent_opencode.value == "true"}
+    bun install -g opencode-ai
+    %{endif}
   EOT
 }
 
@@ -111,7 +125,7 @@ module "code_server" {
 }
 
 resource "docker_image" "workspace" {
-  name = data.coder_parameter.image.value
+  name = "ghcr.io/clankerguru/devcontainer:gradle-latest"
 }
 
 resource "docker_volume" "gradle_cache" {
@@ -123,9 +137,9 @@ resource "docker_volume" "workspace_data" {
 }
 
 resource "docker_container" "workspace" {
-  count   = data.coder_workspace.me.start_count
-  name    = "coder-${data.coder_workspace_owner.me.name}-${data.coder_workspace.me.name}"
-  image   = docker_image.workspace.image_id
+  count      = data.coder_workspace.me.start_count
+  name       = "coder-${data.coder_workspace_owner.me.name}-${data.coder_workspace.me.name}"
+  image      = docker_image.workspace.image_id
   entrypoint = ["sh", "-c", replace(coder_agent.main.init_script, "/localhost|127\\.0\\.0\\.1/", "host.docker.internal")]
 
   hostname = data.coder_workspace.me.name
