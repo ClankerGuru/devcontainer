@@ -66,6 +66,22 @@ data "coder_parameter" "agent_opencode" {
   default      = true
 }
 
+data "coder_parameter" "ide_vscode_desktop" {
+  name         = "ide_vscode_desktop"
+  display_name = "VS Code Desktop"
+  description  = "Enable VS Code Desktop via JetBrains Gateway"
+  type         = "bool"
+  default      = false
+}
+
+data "coder_parameter" "ide_code_server" {
+  name         = "ide_code_server"
+  display_name = "code-server (browser)"
+  description  = "Enable code-server (VS Code in the browser)"
+  type         = "bool"
+  default      = false
+}
+
 resource "coder_agent" "main" {
   os             = "linux"
   arch           = data.coder_provisioner.me.arch
@@ -109,7 +125,7 @@ module "jetbrains_gateway" {
 }
 
 module "vscode_desktop" {
-  count    = data.coder_workspace.me.start_count
+  count    = data.coder_parameter.ide_vscode_desktop.value == "true" ? data.coder_workspace.me.start_count : 0
   source   = "registry.coder.com/coder/vscode-desktop/coder"
   version  = "1.2.1"
   agent_id = coder_agent.main.id
@@ -117,7 +133,7 @@ module "vscode_desktop" {
 }
 
 module "code_server" {
-  count    = data.coder_workspace.me.start_count
+  count    = data.coder_parameter.ide_code_server.value == "true" ? data.coder_workspace.me.start_count : 0
   source   = "registry.coder.com/coder/code-server/coder"
   version  = "1.4.4"
   agent_id = coder_agent.main.id
