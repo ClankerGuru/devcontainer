@@ -3,33 +3,90 @@
 [![Build](https://github.com/ClankerGuru/devcontainer/actions/workflows/build.yml/badge.svg)](https://github.com/ClankerGuru/devcontainer/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Base development container images for ClankerGuru projects.
+Full-stack development container for ClankerGuru projects. One image with JVM, Go, Rust, Android SDK, and all the tooling. AI coding agents are installed at runtime via Coder workspace parameters.
 
-## Images
-
-### Base (no agents)
+## Image
 
 | Tag | Description |
 |-----|-------------|
-| `ghcr.io/clankerguru/devcontainer:<git-tag>` | Pinned versions (e.g. `gradle-9.4.1-kotlin-2.3.20-jbr17`) |
-| `ghcr.io/clankerguru/devcontainer:gradle-latest` | Always latest base |
+| `ghcr.io/clankerguru/devcontainer:gradle-latest` | Always latest build |
+| `ghcr.io/clankerguru/devcontainer:gradle-YYYYMMDD` | Dated weekly snapshot (for rollback) |
+| `ghcr.io/clankerguru/devcontainer:gradle-v*` | Release-tagged builds |
 
-### With AI agents
+## What's inside
 
-| Tag | Agents included |
-|-----|----------------|
-| `ghcr.io/clankerguru/devcontainer:gradle-claude` | Claude Code |
-| `ghcr.io/clankerguru/devcontainer:gradle-copilot` | GitHub Copilot CLI |
-| `ghcr.io/clankerguru/devcontainer:gradle-codex` | OpenAI Codex CLI |
-| `ghcr.io/clankerguru/devcontainer:gradle-opencode` | OpenCode |
-| `ghcr.io/clankerguru/devcontainer:gradle-all` | All four agents |
+| Tool | Version | Installed via |
+|------|---------|---------------|
+| Ubuntu | 24.04 | base image |
+| JetBrains Runtime | 17.0.14 | SDKMAN |
+| Kotlin | 2.3.20 | SDKMAN |
+| Gradle | 9.4.1 | SDKMAN |
+| Go | 1.24.2 | direct download |
+| Rust | stable | rustup |
+| Android SDK | cmdline-tools, platform-tools (adb), build-tools 35.0.1, android-35 | sdkmanager |
+| Neovim | 0.11.2 | GitHub releases |
+| LazyVim | latest | starter config |
+| LazyGit | latest | go install |
+| LazySql | latest | go install |
+| Bun | latest | curl installer |
+| gh (GitHub CLI) | latest | apt |
+| Starship | latest | curl installer |
+| gum | latest | go install |
+| glow | latest | go install |
+| vhs | latest | go install |
+| skate | latest | go install |
+| ripgrep, fd, fzf | system | apt |
+| GPG / SSH | system | apt |
+| gcc / g++ / make | system | apt |
 
-## Use in a project
+User: `dev` with passwordless sudo.
+
+### Not in the image
+
+Docker-in-Docker is added at container startup via the devcontainer feature `ghcr.io/devcontainers/features/docker-in-docker:2`. This is handled by `devcontainer.json`, not the Dockerfile.
+
+## Coder template
+
+The `coder-template/` directory contains a Terraform template for [Coder](https://coder.com) workspaces.
+
+### Workspace parameters
+
+When creating a workspace, you can configure:
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| Repository | string | `git@github.com:ClankerGuru/wrkx.git` | Git repo to clone |
+| Branch | string | `main` | Branch to checkout |
+| Claude Code | bool | `true` | Install Claude Code CLI |
+| GitHub Copilot CLI | bool | `true` | Install `gh copilot` extension |
+| Codex CLI | bool | `true` | Install OpenAI Codex CLI |
+| OpenCode | bool | `true` | Install OpenCode CLI |
+
+### IDE access
+
+The template configures the following IDE modules, available from the Coder dashboard:
+
+| IDE | Module |
+|-----|--------|
+| IntelliJ IDEA Ultimate | JetBrains Gateway |
+| GoLand | JetBrains Gateway |
+| RustRover | JetBrains Gateway |
+| WebStorm | JetBrains Gateway |
+| VS Code Desktop | coder/vscode-desktop |
+| code-server (browser) | coder/code-server |
+
+### Deploy to Coder
+
+```bash
+coder templates push gradle-workspace --directory ./coder-template
+```
+
+## Use as a devcontainer
 
 Create `.devcontainer/Dockerfile`:
 
 ```dockerfile
-FROM ghcr.io/clankerguru/devcontainer:gradle-all
+FROM ghcr.io/clankerguru/devcontainer:gradle-latest
 ```
 
 Create `.devcontainer/devcontainer.json`:
@@ -52,69 +109,23 @@ Create `.devcontainer/devcontainer.json`:
 }
 ```
 
-Open in JetBrains Gateway, IntelliJ IDEA, VS Code, or GitHub Codespaces.
-
-## What's inside
-
-### Base image (`gradle-latest`)
-
-| Tool | Version | Installed via |
-|------|---------|---------------|
-| Ubuntu | 24.04 | base image |
-| JetBrains Runtime | 17.0.14 | SDKMAN |
-| Kotlin | 2.3.20 | SDKMAN |
-| Gradle | 9.4.1 | SDKMAN |
-| Go | 1.24.2 | direct download |
-| Bun | latest | curl installer |
-| git | system | apt |
-| gh (GitHub CLI) | latest | apt |
-| Starship | latest | curl installer |
-| gum | latest | go install |
-| glow | latest | go install |
-| vhs | latest | go install |
-| skate | latest | go install |
-
-User: `dev` with passwordless sudo.
-
-### Agent images
-
-Built on top of the base. All agents installed via Bun:
-
-| Agent | Package | Runtime |
-|-------|---------|---------|
-| Claude Code | `@anthropic-ai/claude-code` | Bun |
-| Copilot CLI | `@github/copilot` | Bun |
-| Codex CLI | `@openai/codex` | Bun |
-| OpenCode | `opencode-ai` | Bun |
-
-### Not in the image
-
-Docker-in-Docker is added at container startup via the devcontainer feature `ghcr.io/devcontainers/features/docker-in-docker:2`. This is handled by `devcontainer.json`, not the Dockerfile.
-
 ## Build locally
 
 ```bash
-# Base image
 docker build -t devcontainer:gradle-local jvm/
-
-# Agent variant (claude, copilot, codex, opencode, or all)
-docker build -t devcontainer:gradle-claude --build-arg AGENTS=claude jvm-agents/
-docker build -t devcontainer:gradle-all --build-arg AGENTS=all jvm-agents/
 ```
 
 ## Repository structure
 
 ```
 devcontainer/
-├── jvm/                    ← Base image Dockerfile
+├── jvm/                    <- Dockerfile (single image, everything included)
 │   └── Dockerfile
-├── jvm-agents/             ← Agent variant Dockerfile (builds FROM base)
-│   └── Dockerfile
-├── coder-template/         ← Coder workspace template (Terraform)
+├── coder-template/         <- Coder workspace template (Terraform)
 │   ├── main.tf
 │   └── README.md
 ├── .github/workflows/
-│   └── build.yml           ← Builds base + 5 agent variants on tag push
+│   └── build.yml           <- Builds on tag push + weekly cron (Mon 06:00 UTC)
 └── README.md
 ```
 
@@ -122,29 +133,34 @@ devcontainer/
 
 | Client | How |
 |--------|-----|
-| **JetBrains Gateway** | Dev Containers → select project folder |
-| **IntelliJ IDEA** | Open folder → "Reopen in Dev Container" |
-| **VS Code** | Open folder → "Reopen in Container" |
-| **GitHub Codespaces** | Code → Codespaces → New |
-| **Coder** | Create workspace from template → connect via Gateway/VS Code/browser |
+| **JetBrains Gateway** | Dev Containers > select project folder |
+| **IntelliJ IDEA** | Open folder > "Reopen in Dev Container" |
+| **VS Code** | Open folder > "Reopen in Container" |
+| **GitHub Codespaces** | Code > Codespaces > New |
+| **Coder** | Create workspace from template > connect via Gateway/VS Code/browser |
+
+## Version management
+
+- Versions are pinned as Dockerfile `ARG`s for reproducibility
+- CI rebuilds **weekly** (Mondays 06:00 UTC) -- Go tools, Rust stable, Charm tools, LazyGit, and LazySql resolve to latest at build time
+- Scheduled builds get a dated tag (`gradle-YYYYMMDD`) alongside `gradle-latest` for rollback
+- To bump a pinned version (JDK, Kotlin, Gradle, Android SDK, Neovim), update the ARG in the Dockerfile and create a new release tag
 
 ## Release a new image
 
-Update the versions in `jvm/Dockerfile`, commit, tag, and push:
-
 ```bash
-git tag gradle-9.4.1-kotlin-2.3.20-jbr17
+git tag gradle-vX.Y.Z
 git push --tags
 ```
 
-CI builds the base image tagged with the git tag + `gradle-latest`, then builds all 5 agent variants on top. The git tag **is** the Docker image tag — one source of truth.
+Or create a release on GitHub -- the tag triggers the build.
 
 ## Offline / private registry
 
 ```bash
-docker pull ghcr.io/clankerguru/devcontainer:gradle-all
-docker tag ghcr.io/clankerguru/devcontainer:gradle-all localhost:5000/devcontainer:gradle-all
-docker push localhost:5000/devcontainer:gradle-all
+docker pull ghcr.io/clankerguru/devcontainer:gradle-latest
+docker tag ghcr.io/clankerguru/devcontainer:gradle-latest localhost:5000/devcontainer:gradle-latest
+docker push localhost:5000/devcontainer:gradle-latest
 ```
 
 ## License
