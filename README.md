@@ -3,17 +3,19 @@
 [![Build](https://github.com/ClankerGuru/devcontainer/actions/workflows/build.yml/badge.svg)](https://github.com/ClankerGuru/devcontainer/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Full-stack development container for ClankerGuru projects. One image with JVM, Go, Rust, Android SDK, and all the tooling. AI coding agents are installed at runtime via Coder workspace parameters.
+Container images and Coder templates for ClankerGuru development and infrastructure.
 
-## Image
+## Images
 
-| Tag | Description |
-|-----|-------------|
-| `ghcr.io/clankerguru/devcontainer:gradle-latest` | Always latest build |
-| `ghcr.io/clankerguru/devcontainer:gradle-YYYYMMDD` | Dated weekly snapshot (for rollback) |
-| `ghcr.io/clankerguru/devcontainer:gradle-v*` | Release-tagged builds |
+| Tag | Purpose | What's in it |
+|-----|---------|-------------|
+| `gradle-latest` | Development | JVM, Go, Rust, Android SDK, Bun, Neovim/LazyVim, Charm tools |
+| `infra-latest` | Infrastructure admin | coder CLI, dokploy CLI, hapi CLI, Charm tools, LazyGit, LazySql |
+| `code-server-latest` | Standalone browser IDE | Dev image + code-server + extensions + Everforest theme |
 
-## What's inside
+All images also get dated weekly snapshots (`*-YYYYMMDD`) for rollback.
+
+## Dev image (`gradle-latest`)
 
 | Tool | Version | Installed via |
 |------|---------|---------------|
@@ -24,144 +26,129 @@ Full-stack development container for ClankerGuru projects. One image with JVM, G
 | Go | 1.24.2 | direct download |
 | Rust | stable | rustup |
 | Android SDK | cmdline-tools, platform-tools (adb), build-tools 35.0.1, android-35 | sdkmanager |
-| Neovim | 0.11.2 | GitHub releases |
+| Neovim | 0.11.7 | GitHub releases |
 | LazyVim | latest | starter config |
 | LazyGit | latest | go install |
 | LazySql | latest | go install |
 | Bun | latest | curl installer |
 | gh (GitHub CLI) | latest | apt |
 | Starship | latest | curl installer |
-| gum | latest | go install |
-| glow | latest | go install |
-| vhs | latest | go install |
-| skate | latest | go install |
+| gum, glow, vhs, skate | latest | go install |
 | ripgrep, fd, fzf | system | apt |
 | GPG / SSH | system | apt |
 | gcc / g++ / make | system | apt |
 
-User: `dev` with passwordless sudo.
+## Infra image (`infra-latest`)
 
-### Not in the image
+| Tool | Version | Installed via |
+|------|---------|---------------|
+| Ubuntu | 24.04 | base image |
+| zsh, tmux | system | apt |
+| coder CLI | 2.31.7 | curl installer |
+| dokploy CLI | latest | npm |
+| hapi (Hostinger) | latest | binary (if available) |
+| gum, glow, vhs, skate | pinned | pre-built binaries |
+| LazyGit | pinned | pre-built binary |
+| LazySql | pinned | pre-built binary |
+| gh (GitHub CLI) | latest | apt |
+| Starship | latest | curl installer |
+| ripgrep, fd, fzf | system | apt |
+| GPG / SSH | system | apt |
 
-Docker-in-Docker is added at container startup via the devcontainer feature `ghcr.io/devcontainers/features/docker-in-docker:2`. This is handled by `devcontainer.json`, not the Dockerfile.
+## Code-server image (`code-server-latest`)
 
-## Coder template
+Dev image + code-server with pre-installed extensions:
 
-The `coder-template/` directory contains a Terraform template for [Coder](https://coder.com) workspaces.
+- **Java**: Java Extension Pack, Gradle for Java, Gradle Language Support
+- **Kotlin**: Kotlin language support, Kotlin formatter
+- **Go**: Go extension
+- **Rust**: rust-analyzer, Even Better TOML
+- **General**: Everforest Dark theme, GitLens, Error Lens, Prettier, EditorConfig
 
-### Workspace parameters
+## Coder templates
 
-When creating a workspace, you can configure:
+### Dev workspace (`coder-template/`)
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| Repository | string | `git@github.com:ClankerGuru/wrkx.git` | Git repo to clone |
-| Branch | string | `main` | Branch to checkout |
-| Claude Code | bool | `true` | Install Claude Code CLI |
-| GitHub Copilot CLI | bool | `true` | Install `gh copilot` extension |
-| Codex CLI | bool | `true` | Install OpenAI Codex CLI |
-| OpenCode | bool | `true` | Install OpenCode CLI |
+Uses `gradle-latest`. Parameters:
 
-### IDE access
+| Parameter | Type | Default |
+|-----------|------|---------|
+| Repository | string | `git@github.com:ClankerGuru/wrkx.git` |
+| Branch | string | `main` |
+| Claude Code | bool | true |
+| GitHub Copilot CLI | bool | true |
+| Codex CLI | bool | true |
+| OpenCode | bool | true |
+| VS Code Desktop | bool | false |
+| code-server (browser) | bool | false |
 
-The template configures the following IDE modules, available from the Coder dashboard:
+IDEs: IntelliJ IDEA Ultimate (default), GoLand, RustRover, WebStorm via JetBrains Gateway.
 
-| IDE | Module |
-|-----|--------|
-| IntelliJ IDEA Ultimate | JetBrains Gateway |
-| GoLand | JetBrains Gateway |
-| RustRover | JetBrains Gateway |
-| WebStorm | JetBrains Gateway |
-| VS Code Desktop | coder/vscode-desktop |
-| code-server (browser) | coder/code-server |
+### Infra workspace (`infra-template/`)
 
-### Deploy to Coder
+Uses `infra-latest`. Lightweight workspace for infrastructure administration with code-server for browser access.
+
+### Deploy templates to Coder
 
 ```bash
 coder templates push gradle-workspace --directory ./coder-template
+coder templates push infra-workspace --directory ./infra-template
 ```
 
-## Use as a devcontainer
+## Dokploy code-server (`dokploy/`)
 
-Create `.devcontainer/Dockerfile`:
+Standalone code-server deployment for Dokploy. Uses `code-server-latest`.
 
-```dockerfile
-FROM ghcr.io/clankerguru/devcontainer:gradle-latest
-```
-
-Create `.devcontainer/devcontainer.json`:
-
-```json
-{
-  "name": "my-project",
-  "build": { "dockerfile": "Dockerfile" },
-  "runArgs": ["--name", "my-project-dev", "--hostname", "my-project"],
-  "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
-  },
-  "remoteUser": "dev",
-  "mounts": [
-    "source=my-project-gradle-cache,target=/home/dev/.gradle,type=volume"
-  ],
-  "containerEnv": {
-    "GRADLE_OPTS": "-Xmx2g -XX:+UseG1GC"
-  }
-}
-```
+Deploy in Dokploy as a Compose project using `dokploy/docker-compose.yml`. Set `PASSWORD` and `TZ` in environment variables, add your domain with HTTPS enabled on port 8443.
 
 ## Build locally
 
 ```bash
+# Dev image
 docker build -t devcontainer:gradle-local jvm/
+
+# Infra image
+docker build -t devcontainer:infra-local infra/
+
+# Code-server image (requires gradle-latest to exist)
+docker build -t devcontainer:code-server-local dokploy/
 ```
 
 ## Repository structure
 
 ```
 devcontainer/
-├── jvm/                    <- Dockerfile (single image, everything included)
+├── jvm/                    <- Dev image Dockerfile
 │   └── Dockerfile
-├── coder-template/         <- Coder workspace template (Terraform)
-│   ├── main.tf
-│   └── README.md
+├── infra/                  <- Infra image Dockerfile
+│   └── Dockerfile
+├── dokploy/                <- Code-server image + Dokploy compose
+│   ├── Dockerfile
+│   └── docker-compose.yml
+├── coder-template/         <- Dev workspace Coder template
+│   └── main.tf
+├── infra-template/         <- Infra workspace Coder template
+│   └── main.tf
 ├── .github/workflows/
-│   └── build.yml           <- Builds on tag push + weekly cron (Mon 06:00 UTC)
+│   └── build.yml           <- Builds all images on tag push + weekly cron
 └── README.md
 ```
-
-## Connect
-
-| Client | How |
-|--------|-----|
-| **JetBrains Gateway** | Dev Containers > select project folder |
-| **IntelliJ IDEA** | Open folder > "Reopen in Dev Container" |
-| **VS Code** | Open folder > "Reopen in Container" |
-| **GitHub Codespaces** | Code > Codespaces > New |
-| **Coder** | Create workspace from template > connect via Gateway/VS Code/browser |
 
 ## Version management
 
 - Versions are pinned as Dockerfile `ARG`s for reproducibility
-- CI rebuilds **weekly** (Mondays 06:00 UTC) -- Go tools, Rust stable, Charm tools, LazyGit, and LazySql resolve to latest at build time
-- Scheduled builds get a dated tag (`gradle-YYYYMMDD`) alongside `gradle-latest` for rollback
-- To bump a pinned version (JDK, Kotlin, Gradle, Android SDK, Neovim), update the ARG in the Dockerfile and create a new release tag
+- CI rebuilds **weekly** (Mondays 06:00 UTC)
+- Scheduled builds get dated tags for rollback
+- To bump a pinned version, update the ARG and create a new release tag
 
-## Release a new image
+## Release
 
 ```bash
 git tag gradle-vX.Y.Z
 git push --tags
 ```
 
-Or create a release on GitHub -- the tag triggers the build.
-
-## Offline / private registry
-
-```bash
-docker pull ghcr.io/clankerguru/devcontainer:gradle-latest
-docker tag ghcr.io/clankerguru/devcontainer:gradle-latest localhost:5000/devcontainer:gradle-latest
-docker push localhost:5000/devcontainer:gradle-latest
-```
+Or create a release on GitHub -- the tag triggers all builds.
 
 ## License
 
