@@ -39,7 +39,7 @@ data "coder_parameter" "agent_claude" {
   display_name = "Claude Code"
   description  = "Install Claude Code CLI agent"
   type         = "bool"
-  default      = "true"
+  default      = true
 }
 
 data "coder_parameter" "agent_copilot" {
@@ -47,7 +47,7 @@ data "coder_parameter" "agent_copilot" {
   display_name = "GitHub Copilot CLI"
   description  = "Install GitHub Copilot CLI agent"
   type         = "bool"
-  default      = "true"
+  default      = true
 }
 
 data "coder_parameter" "agent_codex" {
@@ -55,7 +55,7 @@ data "coder_parameter" "agent_codex" {
   display_name = "Codex CLI"
   description  = "Install OpenAI Codex CLI agent"
   type         = "bool"
-  default      = "true"
+  default      = true
 }
 
 data "coder_parameter" "agent_opencode" {
@@ -63,7 +63,7 @@ data "coder_parameter" "agent_opencode" {
   display_name = "OpenCode"
   description  = "Install OpenCode CLI agent"
   type         = "bool"
-  default      = "true"
+  default      = true
 }
 
 resource "coder_agent" "main" {
