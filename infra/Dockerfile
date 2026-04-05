@@ -64,7 +64,8 @@ RUN ARCH=$(dpkg --print-architecture) \
     || echo "hapi binary not available, install manually with go install"
 
 RUN groupadd -r dev && useradd -r -g dev -m -s /bin/zsh dev \
-    && echo "dev ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/dev
+    && echo "dev ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/dev \
+    && chmod 0440 /etc/sudoers.d/dev
 
 USER dev
 

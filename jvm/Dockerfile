@@ -51,6 +51,7 @@ ENV PATH="/usr/local/go/bin:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_H
 
 RUN groupadd -r dev && useradd -r -g dev -m -s /bin/bash dev \
     && echo "dev ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/dev \
+    && chmod 0440 /etc/sudoers.d/dev \
     && chown -R dev:dev ${ANDROID_HOME}
 
 USER dev

@@ -24,13 +24,13 @@ Everything from the base devcontainer image:
 - Bun, gh CLI, Starship, ripgrep, fd, fzf, GPG, SSH
 
 Plus:
-- code-server (installed on first start)
+- code-server (pre-installed in image)
 - Everforest Dark theme
 - JetBrains Mono font
 
 ## Persistence
 
-- `/home/dev` — persisted (extensions, settings, shell history, tool configs)
-- `/workspace` — persisted (your project files)
+- code-server data (extensions, settings) — persisted via named volume
+- `/workspace` — persisted via named volume
 
 Both survive container restarts and redeployments.

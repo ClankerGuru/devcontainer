@@ -50,7 +50,6 @@ resource "docker_container" "workspace" {
   entrypoint = ["sh", "-c", replace(coder_agent.main.init_script, "/localhost|127\\.0\\.0\\.1/", "host.docker.internal")]
 
   hostname = data.coder_workspace.me.name
-  dns      = ["1.1.1.1"]
 
   env = [
     "CODER_AGENT_TOKEN=${coder_agent.main.token}",
