@@ -103,7 +103,7 @@ module "jetbrains_gateway" {
   version        = "1.1.0"
   agent_id       = coder_agent.main.id
   folder         = "/workspace"
-  jetbrains_ides = ["IU"]
+  jetbrains_ides = ["IU", "GO", "RR", "WS"]
   default        = "IU"
   latest         = true
 }
