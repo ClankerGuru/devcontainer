@@ -7,11 +7,17 @@ RUN curl -fsSL https://code-server.dev/install.sh | sh
 
 USER dev
 
-# Extensions: Java / Kotlin / Gradle / Android
-RUN code-server --install-extension vscjava.vscode-java-pack \
-    && code-server --install-extension fwcd.kotlin \
+# Extensions: Java / Kotlin / Gradle
+# Note: vscjava.vscode-java-pack is expanded into its individual extensions
+# because code-server extension packs do not reliably resolve sub-extensions.
+# naco-siren.gradle-language is removed (not available on Open VSX).
+RUN code-server --install-extension redhat.java \
+    && code-server --install-extension vscjava.vscode-java-debug \
+    && code-server --install-extension vscjava.vscode-java-test \
+    && code-server --install-extension vscjava.vscode-maven \
+    && code-server --install-extension vscjava.vscode-java-dependency \
     && code-server --install-extension vscjava.vscode-gradle \
-    && code-server --install-extension naco-siren.gradle-language \
+    && code-server --install-extension fwcd.kotlin \
     && code-server --install-extension mathiasfrohlich.Kotlin \
     # Go
     && code-server --install-extension golang.go \

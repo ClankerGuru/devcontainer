@@ -21,35 +21,32 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && curl -sS https://starship.rs/install.sh | sh -s -- --yes \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/*
 
+# Helper: download a tarball and install the named binary to /usr/local/bin.
+# Works regardless of whether the tarball contains a subdirectory or flat files.
 # Charm tools + LazyGit + LazySql (pre-built binaries)
-RUN ARCH=$(dpkg --print-architecture) \
+RUN set -e \
+    && ARCH=$(dpkg --print-architecture) \
     && if [ "$ARCH" = "amd64" ]; then GOARCH="x86_64"; else GOARCH="arm64"; fi \
-    && mkdir -p /tmp/tools \
+    && install_from_tar() { \
+         local url="$1" bin="$2" tmpdir; \
+         tmpdir=$(mktemp -d); \
+         curl -fsSL "$url" | tar xz -C "$tmpdir"; \
+         find "$tmpdir" -name "$bin" -type f -exec mv {} /usr/local/bin/ \; ; \
+         chmod +x "/usr/local/bin/$bin"; \
+         rm -rf "$tmpdir"; \
+       } \
     # gum
-    && curl -fsSL "https://github.com/charmbracelet/gum/releases/download/v${GUM_VERSION}/gum_${GUM_VERSION}_Linux_${GOARCH}.tar.gz" \
-       | tar xz -C /tmp/tools \
-    && mv /tmp/tools/gum_${GUM_VERSION}_Linux_${GOARCH}/gum /usr/local/bin/ \
+    && install_from_tar "https://github.com/charmbracelet/gum/releases/download/v${GUM_VERSION}/gum_${GUM_VERSION}_Linux_${GOARCH}.tar.gz" gum \
     # glow
-    && curl -fsSL "https://github.com/charmbracelet/glow/releases/download/v${GLOW_VERSION}/glow_${GLOW_VERSION}_Linux_${GOARCH}.tar.gz" \
-       | tar xz -C /tmp/tools \
-    && mv /tmp/tools/glow_${GLOW_VERSION}_Linux_${GOARCH}/glow /usr/local/bin/ \
+    && install_from_tar "https://github.com/charmbracelet/glow/releases/download/v${GLOW_VERSION}/glow_${GLOW_VERSION}_Linux_${GOARCH}.tar.gz" glow \
     # vhs
-    && curl -fsSL "https://github.com/charmbracelet/vhs/releases/download/v${VHS_VERSION}/vhs_${VHS_VERSION}_Linux_${GOARCH}.tar.gz" \
-       | tar xz -C /tmp/tools \
-    && mv /tmp/tools/vhs_${VHS_VERSION}_Linux_${GOARCH}/vhs /usr/local/bin/ \
+    && install_from_tar "https://github.com/charmbracelet/vhs/releases/download/v${VHS_VERSION}/vhs_${VHS_VERSION}_Linux_${GOARCH}.tar.gz" vhs \
     # skate
-    && curl -fsSL "https://github.com/charmbracelet/skate/releases/download/v${SKATE_VERSION}/skate_${SKATE_VERSION}_Linux_${GOARCH}.tar.gz" \
-       | tar xz -C /tmp/tools \
-    && mv /tmp/tools/skate_${SKATE_VERSION}_Linux_${GOARCH}/skate /usr/local/bin/ \
+    && install_from_tar "https://github.com/charmbracelet/skate/releases/download/v${SKATE_VERSION}/skate_${SKATE_VERSION}_Linux_${GOARCH}.tar.gz" skate \
     # lazygit
-    && curl -fsSL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_${GOARCH}.tar.gz" \
-       | tar xz -C /tmp/tools \
-    && mv /tmp/tools/lazygit /usr/local/bin/ \
+    && install_from_tar "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_${GOARCH}.tar.gz" lazygit \
     # lazysql
-    && curl -fsSL "https://github.com/jorgerojas26/lazysql/releases/download/v${LAZYSQL_VERSION}/lazysql_Linux_${GOARCH}.tar.gz" \
-       | tar xz -C /tmp/tools \
-    && mv /tmp/tools/lazysql /usr/local/bin/ \
-    && rm -rf /tmp/tools
+    && install_from_tar "https://github.com/jorgerojas26/lazysql/releases/download/v${LAZYSQL_VERSION}/lazysql_Linux_${GOARCH}.tar.gz" lazysql
 
 # Coder CLI
 RUN curl -fsSL "https://coder.com/install.sh" | sh -s -- --version ${CODER_VERSION}
