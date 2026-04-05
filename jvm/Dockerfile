@@ -5,7 +5,7 @@ ARG SDKMAN_GRADLE=9.4.1
 ARG SDKMAN_KOTLIN=2.3.20
 ARG GO_VERSION=1.24.2
 ARG RUST_VERSION=stable
-ARG NEOVIM_VERSION=0.11.2
+ARG NEOVIM_VERSION=0.11.7
 ARG ANDROID_BUILD_TOOLS=35.0.1
 ARG ANDROID_PLATFORM=android-35
 
@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Neovim (latest stable from GitHub releases)
 RUN ARCH=$(dpkg --print-architecture) \
-    && if [ "$ARCH" = "amd64" ]; then NVIM_ARCH="x86_64"; else NVIM_ARCH="aarch64"; fi \
+    && if [ "$ARCH" = "amd64" ]; then NVIM_ARCH="x86_64"; else NVIM_ARCH="arm64"; fi \
     && curl -fsSL "https://github.com/neovim/neovim/releases/download/v${NEOVIM_VERSION}/nvim-linux-${NVIM_ARCH}.tar.gz" \
        | tar -C /usr/local --strip-components=1 -xz
 
