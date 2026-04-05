@@ -100,7 +100,7 @@ resource "coder_agent" "main" {
 module "jetbrains_gateway" {
   count          = data.coder_workspace.me.start_count
   source         = "registry.coder.com/modules/jetbrains-gateway/coder"
-  version        = "1.1.0"
+  version        = "1.2.6"
   agent_id       = coder_agent.main.id
   folder         = "/workspace"
   jetbrains_ides = ["IU", "GO", "RR", "WS"]
