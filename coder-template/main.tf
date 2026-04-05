@@ -69,7 +69,7 @@ data "coder_parameter" "agent_opencode" {
 data "coder_parameter" "ide_vscode_desktop" {
   name         = "ide_vscode_desktop"
   display_name = "VS Code Desktop"
-  description  = "Enable VS Code Desktop via JetBrains Gateway"
+  description  = "Enable VS Code Desktop via Remote SSH"
   type         = "bool"
   default      = false
 }
