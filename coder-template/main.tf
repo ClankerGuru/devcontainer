@@ -94,11 +94,20 @@ module "jetbrains_gateway" {
   latest         = true
 }
 
+module "vscode_desktop" {
+  count    = data.coder_workspace.me.start_count
+  source   = "registry.coder.com/coder/vscode-desktop/coder"
+  version  = "1.2.1"
+  agent_id = coder_agent.main.id
+  folder   = "/workspace"
+}
+
 module "code_server" {
   count    = data.coder_workspace.me.start_count
   source   = "registry.coder.com/coder/code-server/coder"
   version  = "1.4.4"
   agent_id = coder_agent.main.id
+  folder   = "/workspace"
 }
 
 resource "docker_image" "workspace" {
