@@ -6,6 +6,8 @@ ARG SDKMAN_KOTLIN=2.3.20
 ARG GO_VERSION=1.24.2
 ARG RUST_VERSION=stable
 ARG NEOVIM_VERSION=0.11.2
+ARG ANDROID_BUILD_TOOLS=35.0.1
+ARG ANDROID_PLATFORM=android-35
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git curl unzip zip openssh-client ca-certificates bash sudo \
@@ -29,10 +31,26 @@ RUN ARCH=$(dpkg --print-architecture) \
 RUN ARCH=$(dpkg --print-architecture) \
     && curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${ARCH}.tar.gz" | tar -C /usr/local -xz
 
-ENV PATH="/usr/local/go/bin:${PATH}"
+# Android SDK command-line tools + platform-tools (adb)
+ENV ANDROID_HOME=/opt/android-sdk
+RUN mkdir -p ${ANDROID_HOME}/cmdline-tools \
+    && curl -fsSL "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip" \
+       -o /tmp/cmdline-tools.zip \
+    && unzip -q /tmp/cmdline-tools.zip -d ${ANDROID_HOME}/cmdline-tools \
+    && mv ${ANDROID_HOME}/cmdline-tools/cmdline-tools ${ANDROID_HOME}/cmdline-tools/latest \
+    && rm /tmp/cmdline-tools.zip \
+    && yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 \
+    && ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager \
+       "platform-tools" \
+       "build-tools;${ANDROID_BUILD_TOOLS}" \
+       "platforms;${ANDROID_PLATFORM}" \
+    && chmod -R a+r ${ANDROID_HOME}
+
+ENV PATH="/usr/local/go/bin:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools:${PATH}"
 
 RUN groupadd -r dev && useradd -r -g dev -m -s /bin/bash dev \
-    && echo "dev ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/dev
+    && echo "dev ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/dev \
+    && chown -R dev:dev ${ANDROID_HOME}
 
 USER dev
 SHELL ["/bin/bash", "-c"]
@@ -82,6 +100,6 @@ ENV JAVA_HOME=/home/dev/.sdkman/candidates/java/current \
     KOTLIN_HOME=/home/dev/.sdkman/candidates/kotlin/current \
     GRADLE_USER_HOME=/home/dev/.gradle \
     BUN_INSTALL=/home/dev/.bun \
-    PATH="/home/dev/.cargo/bin:/home/dev/go/bin:/home/dev/.bun/bin:/home/dev/.sdkman/candidates/kotlin/current/bin:/home/dev/.sdkman/candidates/java/current/bin:/home/dev/.sdkman/candidates/gradle/current/bin:/usr/local/go/bin:${PATH}"
+    PATH="/home/dev/.cargo/bin:/home/dev/go/bin:/home/dev/.bun/bin:/home/dev/.sdkman/candidates/kotlin/current/bin:/home/dev/.sdkman/candidates/java/current/bin:/home/dev/.sdkman/candidates/gradle/current/bin:${PATH}"
 
 WORKDIR /workspace
