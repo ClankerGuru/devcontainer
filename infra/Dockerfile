@@ -32,6 +32,9 @@ RUN set -e \
          tmpdir=$(mktemp -d); \
          curl -fsSL "$url" | tar xz -C "$tmpdir"; \
          find "$tmpdir" -name "$bin" -type f -exec mv {} /usr/local/bin/ \; ; \
+         if [ ! -f "/usr/local/bin/$bin" ]; then \
+           echo "ERROR: $bin not found in $url" >&2; exit 1; \
+         fi; \
          chmod +x "/usr/local/bin/$bin"; \
          rm -rf "$tmpdir"; \
        } \
