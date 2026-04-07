@@ -7,6 +7,7 @@ ARG VHS_VERSION=0.9.0
 ARG SKATE_VERSION=1.0.1
 ARG LAZYGIT_VERSION=0.51.1
 ARG LAZYSQL_VERSION=0.3.9
+ARG NEOVIM_VERSION=0.11.7
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     zsh tmux git curl unzip zip openssh-client ca-certificates bash sudo \
@@ -20,6 +21,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get update && apt-get install -y --no-install-recommends gh \
     && curl -sS https://starship.rs/install.sh | sh -s -- --yes \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/*
+
+# Neovim
+RUN ARCH=$(dpkg --print-architecture) \
+    && if [ "$ARCH" = "amd64" ]; then NVIM_ARCH="x86_64"; else NVIM_ARCH="arm64"; fi \
+    && curl -fsSL "https://github.com/neovim/neovim/releases/download/v${NEOVIM_VERSION}/nvim-linux-${NVIM_ARCH}.tar.gz" \
+       | tar -C /usr/local --strip-components=1 -xz
 
 # Helper: download a tarball and install the named binary to /usr/local/bin.
 # Works regardless of whether the tarball contains a subdirectory or flat files.
@@ -69,7 +76,18 @@ RUN groupadd -r dev && useradd -r -g dev -m -s /bin/zsh dev \
 
 USER dev
 
+# Bun (for AI agent installation at runtime)
+RUN curl -fsSL https://bun.sh/install | bash \
+    && ln -sf /home/dev/.bun/bin/bun /home/dev/.bun/bin/node
+
+# LazyVim
+RUN git clone https://github.com/LazyVim/starter ~/.config/nvim \
+    && rm -rf ~/.config/nvim/.git
+
 # Shell config
 RUN echo 'eval "$(starship init zsh)"' >> ~/.zshrc
+
+ENV BUN_INSTALL=/home/dev/.bun \
+    PATH="/home/dev/.bun/bin:${PATH}"
 
 WORKDIR /workspace
