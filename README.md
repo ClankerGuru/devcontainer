@@ -9,13 +9,16 @@ Docker images for ClankerGuru development and infrastructure.
 
 | Image | Tag | Purpose |
 |-------|-----|---------|
-| Dev | `gradle-latest` | Full-stack: JVM, Go, Rust, Android SDK, Neovim, Charm tools |
+| JVM | `gradle-latest` | Full-stack: JVM, Go, Rust, Android SDK, Neovim, Charm tools |
 | Infra | `infra-latest` | Admin: coder, dokploy, hapi CLIs, Charm tools |
-| code-server | `code-server-latest` | Dev image + code-server + extensions + Everforest theme |
+| code-server | `code-server-latest` | JVM image + code-server + extensions + Everforest theme |
+| Go | `go-latest` | Go workspace: Go 1.24.2, golangci-lint, code-server, Charm tools |
+| Rust | `rust-latest` | Rust workspace: stable toolchain, clippy, rustfmt, cargo tools, code-server |
+| Web | `web-latest` | Web workspace: Bun, Node.js LTS, code-server, Charm tools |
 
 All images get weekly dated snapshots (`*-YYYYMMDD`) for rollback.
 
-## Dev image (`jvm/Dockerfile`)
+## JVM image (`jvm/Dockerfile`)
 
 | Tool | Version |
 |------|---------|
@@ -47,38 +50,94 @@ All images get weekly dated snapshots (`*-YYYYMMDD`) for rollback.
 
 ## code-server image (`dokploy/Dockerfile`)
 
-Dev image + code-server with pre-installed extensions:
+JVM image + code-server with pre-installed extensions:
 
 - Java Extension Pack, Gradle for Java, Kotlin
 - Go, rust-analyzer, Even Better TOML
 - Everforest Dark theme, GitLens, Error Lens, Prettier
 
+## Go image (`go/Dockerfile`)
+
+See [go/README.md](go/README.md) for details.
+
+| Tool | Version |
+|------|---------|
+| Ubuntu | 24.04 |
+| Go | 1.24.2 |
+| golangci-lint | latest |
+| code-server | latest |
+| Neovim | 0.11.7 + LazyVim |
+| Bun | latest |
+| gum, glow, vhs, skate | pinned |
+| LazyGit, LazySql | pinned |
+
+## Rust image (`rust/Dockerfile`)
+
+See [rust/README.md](rust/README.md) for details.
+
+| Tool | Version |
+|------|---------|
+| Ubuntu | 24.04 |
+| Rust | stable (clippy, rustfmt, rust-analyzer) |
+| cargo-watch, cargo-edit | latest |
+| code-server | latest |
+| Neovim | 0.11.7 + LazyVim |
+| Bun | latest |
+| gum, glow, vhs, skate | pinned |
+| LazyGit, LazySql | pinned |
+
+## Web image (`web/Dockerfile`)
+
+See [web/README.md](web/README.md) for details.
+
+| Tool | Version |
+|------|---------|
+| Ubuntu | 24.04 |
+| Bun | latest |
+| Node.js | LTS |
+| code-server | latest |
+| Neovim | 0.11.7 + LazyVim |
+| gum, glow, vhs, skate | pinned |
+| LazyGit, LazySql | pinned |
+
 ## Build locally
 
 ```bash
-docker build -t devcontainer:dev jvm/
+docker build -t ghcr.io/clankerguru/devcontainer:gradle-latest jvm/
 docker build -t devcontainer:infra infra/
-docker build -t devcontainer:code-server dokploy/   # requires gradle-latest
+docker build -t devcontainer:code-server dokploy/   # requires ghcr.io/clankerguru/devcontainer:gradle-latest
+docker build -t devcontainer:go go/
+docker build -t devcontainer:rust rust/
+docker build -t devcontainer:web web/
 ```
 
 ## CI
 
-Builds all three images on tag push (`gradle-*`) and weekly (Mondays 06:00 UTC).
+Builds all six images on tag push (`gradle-*`) and weekly (Mondays 06:00 UTC).
 
-- `dev` and `infra` build in parallel
+- `dev`, `infra`, `go`, `rust`, and `web` build in parallel
 - `code-server` builds after `dev` (depends on `gradle-latest`)
-- Dated tags for rollback: `gradle-YYYYMMDD`, `infra-YYYYMMDD`, `code-server-YYYYMMDD`
+- Dated tags for rollback: `gradle-YYYYMMDD`, `infra-YYYYMMDD`, `code-server-YYYYMMDD`, `go-YYYYMMDD`, `rust-YYYYMMDD`, `web-YYYYMMDD`
 
 ## Structure
 
 ```text
 devcontainer/
-├── jvm/                <- Dev image
+├── jvm/                <- JVM dev image
 │   └── Dockerfile
 ├── infra/              <- Infra image
 │   └── Dockerfile
 ├── dokploy/            <- code-server image
 │   └── Dockerfile
+├── go/                 <- Go dev image
+│   ├── Dockerfile
+│   └── README.md
+├── rust/               <- Rust dev image
+│   ├── Dockerfile
+│   └── README.md
+├── web/                <- Web dev image
+│   ├── Dockerfile
+│   └── README.md
 ├── .github/workflows/
 │   └── build.yml
 └── README.md
